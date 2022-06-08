@@ -20,7 +20,7 @@ const Description = styled.small`
   padding: 0;
   margin: 16px 0 0 0;
   display: block;
-`;
+`
 
 const ImageWrapper = styled.div`
   position: fixed;

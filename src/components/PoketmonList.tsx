@@ -1,9 +1,24 @@
 import React from 'react';
 import styled from '@emotion/styled/macro';
+import { useHistory } from 'react-router-dom';
+
+import { ListResponse } from '../types';
+import { formatNumbering } from '../utils';
+import usePokemonQuery from '../hooks/usePokemonQueries';
 
 const Base = styled.div`
   margin-top: 24px;
 `;
+
+const LoadingWrapper = styled.div`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: calc(100vh - 180px);
+`;
+
+const Loading = styled.img``;
 
 const ListItem = styled.li`
   position: relative;
@@ -48,19 +63,31 @@ const Index = styled.p`
 const getImageUrl = (pokemonIndex: number): string =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${pokemonIndex}.png`
 
-const formatNumbering = (pokemonIndex: number | string): string =>
-  `#${(typeof pokemonIndex === 'number' ? String(pokemonIndex) : pokemonIndex).padStart(3, '0')}`
-
 const PokemonList: React.FC = () => {
+  const { isLoading, isError, data } = usePokemonQuery<ListResponse>();
+  const { push } = useHistory();
+
   return (
     <Base>
-      <List>
-        <ListItem>
-          <Image src={getImageUrl(1)} alt="bulbasaur" />
-          <Name>bulbasaur</Name>
-          <Index>{formatNumbering(1)}</Index>
-        </ListItem>
-      </List>
+      {
+        isLoading || isError ? (
+          <LoadingWrapper>
+            <Loading src="/loading.gif" alt="loading" />
+          </LoadingWrapper>
+        ) : (
+          <List>
+            {
+              data?.data.results.map((pokemon, idx) => (
+                <ListItem key={pokemon.name} onClick={() => push(`/${idx + 1}`)}>
+                <Image src={getImageUrl(idx + 1)} alt={pokemon.name} />
+                <Name>{pokemon.name}</Name>
+                <Index>{formatNumbering(idx + 1)}</Index>
+              </ListItem>
+              ))
+            }
+          </List>
+        )
+      }
     </Base>
   )
 }
